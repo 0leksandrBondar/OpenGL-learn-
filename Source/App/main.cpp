@@ -1,29 +1,47 @@
-#include <iostream>
+#include "Game/Game.h"
+#include "Managers/ShaderManager.h"
+#include "Windows/MainWindow.h"
 
 #include "glad.h"
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
-int main(void)
+#include <iostream>
+
+void initGLFW()
 {
-	GLFWwindow* window;
-	GLuint vertex_buffer, vertex_shader, fragment_shader, program;
-	GLint mvp_location, vpos_location, vcol_location;
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+}
 
-	if (!glfwInit())
-        exit(EXIT_FAILURE);
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-
-	window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
-	if (!window)
+void initGLAD()
+{
+	if (!gladLoadGL())
 	{
-		glfwTerminate();
-		exit(EXIT_FAILURE);
+		std::cout << "can't load GLAD!";
 	}
+}
 
+int main()
+{
+	initGLFW();
+	MainWindow::GetInstance()->initWindow();
+	initGLAD();
 
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
-	system("pause");
+	GLfloat vertices[] = {1.0f, -0.5f, -1.0f, -0.5f, 0.0f, 1.0f};
+	GLfloat colorVertices[] = {1.0f, -0.5f, -1.0f, -0.5f, 0.0f, 1.0f};
+
+	ShaderManager::GetInstance()->initVertexShader("assets/shaders/main.vert");
+	ShaderManager::GetInstance()->initFragShader("assets/shaders/main.frag");
+	ShaderManager::GetInstance()->createShaderProgram();
+
+	ShaderManager::GetInstance()->initVBO(vertices, sizeof(vertices));
+	ShaderManager::GetInstance()->initVAO();
+
+	ShaderManager::GetInstance()->initShaderParams(0,2);
+
+	Game::GetInstance()->startGameLoop();
+
+	return 0;
 }
